@@ -1,0 +1,17 @@
+{
+  "extends": [
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "curly": true,
+    "quotemark": false,
+    "interface-name": [false, "always-prefix"],
+    "one-line": [false, "check-else"],
+    "trailing-comma": true,
+    "only-arrow-functions": false,
+    "typedef": true,
+    "no-string-literal": false,
+    "no-reference": false,
+    "ordered-imports": false
+  }
+}
