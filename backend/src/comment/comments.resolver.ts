@@ -1,11 +1,24 @@
-import { Resolver, Query, Mutation, Arg } from "type-graphql/dist";
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Arg,
+  FieldResolver,
+  Root
+} from "type-graphql/dist";
 import { Comment } from "../entity/comment";
+import { users } from "../user/dummy-users";
 
-@Resolver()
+@Resolver(Comment)
 export class CommentsResolver {
   @Query(() => String)
   async hello() {
     return "hello-world";
+  }
+
+  @FieldResolver()
+  async user(@Root() parent: Comment) {
+    return users.filter(user => user.id === parent.userId).pop();
   }
 
   @Mutation(() => Comment)

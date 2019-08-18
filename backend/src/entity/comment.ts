@@ -8,6 +8,7 @@ import {
   Entity
 } from "typeorm";
 import { ObjectType, Field } from "type-graphql/dist";
+import { User } from "../user/user";
 
 @ObjectType()
 @Entity()
@@ -35,4 +36,7 @@ export class Comment extends BaseEntity {
   @Field()
   @VersionColumn()
   version: number;
+
+  @Field()
+  user: User;
 }
