@@ -25,7 +25,7 @@ export class CommentsResolver {
   async addComment(
     @Arg("content") content: string,
     @Arg("userId") userId: string
-  ) {
+  ): Promise<Comment> {
     const comment = Comment.create({
       content,
       userId

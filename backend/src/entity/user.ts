@@ -9,14 +9,21 @@ export class User extends BaseEntity {
   id: string;
 
   @Field()
-  @Column()
+  @Column({ nullable: false })
   userId: string;
 
   @Field()
-  @Column()
+  @Column({ nullable: false })
   name: string;
 
   @Field()
-  @Column("boolean")
+  @Column("boolean", { default: true })
   active: boolean;
+
+  @Column({ nullable: false })
+  password: string;
+
+  @Field()
+  @Column("text", { unique: true, nullable: false })
+  email: string;
 }

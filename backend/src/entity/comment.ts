@@ -8,7 +8,7 @@ import {
   Entity
 } from "typeorm";
 import { ObjectType, Field } from "type-graphql/dist";
-import { User } from "../user/user";
+import { User } from "./user";
 
 @ObjectType()
 @Entity()
@@ -39,4 +39,8 @@ export class Comment extends BaseEntity {
 
   @Field()
   user: User;
+
+  @Field()
+  @Column({ default: false })
+  isDeleted: boolean;
 }
