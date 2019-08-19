@@ -7,7 +7,7 @@ import {
   Root
 } from "type-graphql/dist";
 import { Comment } from "../entity/comment";
-import { users } from "../user/dummy-users";
+import { User } from "../entity/user";
 
 @Resolver(Comment)
 export class CommentsResolver {
@@ -18,7 +18,7 @@ export class CommentsResolver {
 
   @FieldResolver()
   async user(@Root() parent: Comment) {
-    return users.filter(user => user.id === parent.userId).pop();
+    return User.findOne({ where: { id: parent.userId } });
   }
 
   @Mutation(() => Comment)
@@ -26,7 +26,7 @@ export class CommentsResolver {
     @Arg("content") content: string,
     @Arg("userId") userId: string
   ): Promise<Comment> {
-    const comment = Comment.create({
+    const comment = Comment.create<Comment>({
       content,
       userId
     }).save();

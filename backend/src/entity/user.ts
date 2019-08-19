@@ -1,6 +1,6 @@
 import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 import { ObjectType, Field } from "type-graphql/dist";
-
+import { Comment } from "./comment";
 @ObjectType()
 @Entity()
 export class User extends BaseEntity {
@@ -26,4 +26,7 @@ export class User extends BaseEntity {
   @Field()
   @Column("text", { unique: true, nullable: false })
   email: string;
+
+  @Field(() => Comment)
+  comments: Comment[];
 }

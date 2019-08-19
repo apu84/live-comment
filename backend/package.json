@@ -39,7 +39,7 @@
     "@types/uuid": "^3.4.5",
     "nodemon": "^1.19.1",
     "prettier": "^1.18.2",
-    "ts-node-dev": "^1.0.0-pre.41",
+    "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.5.3"
@@ -48,6 +48,6 @@
     "prettier": "prettier --write \"**/*.{js,ts}\"",
     "lint": "tslint --project .",
     "format": "npm run prettier && npm run lint",
-    "start": "ts-node-dev --respawn src/index.ts"
+    "start": "ts-node src/index.ts"
   }
 }

@@ -1,4 +1,10 @@
-import { Arg, FieldResolver, Mutation, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  FieldResolver,
+  Mutation,
+  Resolver,
+  Root
+} from "type-graphql/dist";
 import { User } from "../entity/user";
 import { Comment } from "../entity/comment";
 import bcrypt from "bcryptjs";
@@ -7,7 +13,7 @@ import bcrypt from "bcryptjs";
 export class UsersResolver {
   @FieldResolver()
   async comments(@Root() parent: User): Promise<Comment[]> {
-    return Comment.find({ where: { userId: parent.id } });
+    return Comment.find<Comment>({ where: { userId: parent.id } });
   }
 
   @Mutation(() => User)
@@ -18,7 +24,7 @@ export class UsersResolver {
     @Arg("email") email: string
   ): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 9);
-    const user = User.create({
+    const user = User.create<User>({
       name,
       userId,
       password: hashedPassword,
