@@ -7,3 +7,4 @@
 *.iml
 dist
 node_modules
+ormconfig.json

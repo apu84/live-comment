@@ -16,6 +16,28 @@ export class CommentsResolver {
     return "hello-world";
   }
 
+  @Query(() => [Comment])
+  async comments(): Promise<Comment[]> {
+    return Comment.find();
+  }
+
+  @Query(() => Comment, { nullable: true })
+  async comment(@Arg("id") id: string): Promise<Comment | undefined> {
+    return Comment.findOne({ where: { id } });
+  }
+
+  @Query(() => [Comment])
+  async commentsByUser(
+    @Arg("userId") userId: string,
+    @Arg("take", { defaultValue: 10 }) take: number
+  ): Promise<Comment[] | undefined> {
+    return Comment.find({
+      where: { userId },
+      take,
+      order: { creationDate: "DESC" }
+    });
+  }
+
   @FieldResolver()
   async user(@Root() parent: Comment) {
     return User.findOne({ where: { id: parent.userId } });
