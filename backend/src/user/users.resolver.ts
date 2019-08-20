@@ -15,7 +15,7 @@ import { RegisterUserInputType } from "./register-user.input";
 export class UsersResolver {
   @Query(() => [User])
   async users(): Promise<User[]> {
-    return User.find();
+    return User.find<User>();
   }
 
   @Query(() => User, { nullable: true })

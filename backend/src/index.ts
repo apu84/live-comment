@@ -1,21 +1,28 @@
 import "reflect-metadata";
-
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql/dist";
-import { CommentsResolver } from "./comment/comments.resolver";
 import { ApolloServer } from "apollo-server-express/dist";
 import Express from "express";
-import { UsersResolver } from "./user/users.resolver";
+import { getSession } from "./common/user-session";
+import { corsConfig } from "./common/cors-config";
 
-const main = async () => {
+const bootstrap = async () => {
   await createConnection();
 
   const schema = await buildSchema({
-    resolvers: [CommentsResolver, UsersResolver]
+    resolvers: [__dirname + "/**/*.resolver.ts"]
   });
 
-  const apolloServer = new ApolloServer({ schema });
+  const apolloServer = new ApolloServer({
+    schema,
+    context: ({ req, res }: any) => ({ req, res })
+  });
+
   const app = Express();
+
+  app.use(corsConfig());
+  app.use(getSession());
+
   apolloServer.applyMiddleware({ app });
 
   app.listen(4000, () => {
@@ -23,4 +30,4 @@ const main = async () => {
   });
 };
 
-main();
+bootstrap();

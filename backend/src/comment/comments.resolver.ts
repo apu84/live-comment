@@ -4,10 +4,12 @@ import {
   Mutation,
   Arg,
   FieldResolver,
-  Root
+  Root,
+  Ctx
 } from "type-graphql/dist";
 import { Comment } from "../entity/comment";
 import { User } from "../entity/user";
+import { AppContext } from "../common/types/context";
 
 @Resolver(Comment)
 export class CommentsResolver {
@@ -18,7 +20,7 @@ export class CommentsResolver {
 
   @Query(() => [Comment])
   async comments(): Promise<Comment[]> {
-    return Comment.find();
+    return Comment.find<Comment>();
   }
 
   @Query(() => Comment, { nullable: true })
@@ -46,8 +48,9 @@ export class CommentsResolver {
   @Mutation(() => Comment)
   async addComment(
     @Arg("content") content: string,
-    @Arg("userId") userId: string
+    @Ctx() ctx: AppContext
   ): Promise<Comment> {
+    const userId = ctx.req.session!.userId;
     const comment = Comment.create<Comment>({
       content,
       userId
