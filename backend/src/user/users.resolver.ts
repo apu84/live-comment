@@ -9,6 +9,7 @@ import {
 import { User } from "../entity/user";
 import { Comment } from "../entity/comment";
 import bcrypt from "bcryptjs";
+import { RegisterUserInputType } from "./register-user.input";
 
 @Resolver(User)
 export class UsersResolver {
@@ -28,12 +29,13 @@ export class UsersResolver {
   }
 
   @Mutation(() => User)
-  async createUser(
-    @Arg("name") name: string,
-    @Arg("userId") userId: string,
-    @Arg("password") password: string,
-    @Arg("email") email: string
-  ): Promise<User> {
+  async createUser(@Arg("data")
+  {
+    name,
+    userId,
+    email,
+    password
+  }: RegisterUserInputType): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 9);
     const user = User.create<User>({
       name,
