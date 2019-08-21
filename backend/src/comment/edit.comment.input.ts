@@ -3,7 +3,7 @@ import { IfMatch } from "../common/validators/version.validator";
 import { Comment } from "../entity/comment";
 
 @InputType()
-export class CommentInputType {
+export class EditCommentInputType {
   @Field()
   id: string;
 

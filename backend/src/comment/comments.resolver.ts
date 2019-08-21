@@ -14,12 +14,13 @@ import { isAuthorized } from "../common/middleware/authorized";
 import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
 import { User } from "../entity/user";
-import { CommentInputType } from "./comment.input";
+import { CreateCommentInputType } from "./create.comment.input";
+import { EditCommentInputType } from "./edit.comment.input";
 
 function filterDeleted<T>(
   condition: FindManyOptions<T>,
   deleted: boolean = false
-) {
+): FindManyOptions<T> {
   if (!condition.where) {
     condition.where = {};
   }
@@ -30,13 +31,15 @@ function filterDeleted<T>(
 @Resolver(Comment)
 export class CommentsResolver {
   @Query(() => String)
-  async hello() {
-    return "hello-world";
+  async ping() {
+    return "pong";
   }
 
   @Query(() => [Comment])
-  async comments(): Promise<Comment[]> {
-    return Comment.find<Comment>(filterDeleted({}));
+  async comments(
+    @Arg("parentId", { defaultValue: "-1" }) parentId?: string
+  ): Promise<Comment[]> {
+    return Comment.find<Comment>(filterDeleted({ where: { parentId } }));
   }
 
   @Query(() => Comment, { nullable: true })
@@ -68,13 +71,14 @@ export class CommentsResolver {
   @UseMiddleware(isAuthenticated)
   @Mutation(() => Comment)
   async addComment(
-    @Arg("content") content: string,
+    @Arg("data") data: CreateCommentInputType,
     @Ctx() ctx: AppContext
   ): Promise<Comment> {
     const userId = ctx.req.session!.userId;
     const comment = Comment.create<Comment>({
-      content,
-      userId
+      content: data.content,
+      userId,
+      parentId: data.parentId
     }).save();
 
     return comment;
@@ -83,7 +87,7 @@ export class CommentsResolver {
   @UseMiddleware(isAuthenticated, isAuthorized)
   @Mutation(() => Comment, { nullable: true })
   async editComment(
-    @Arg("data") data: CommentInputType
+    @Arg("data") data: EditCommentInputType
   ): Promise<Comment | undefined> {
     const comment = await Comment.findOne<Comment>(
       filterDeleted<Comment>({ where: { id: data.id } })
@@ -106,5 +110,19 @@ export class CommentsResolver {
       await comment.save();
     }
     return comment;
+  }
+
+  @FieldResolver(() => [Comment], { nullable: true })
+  async replies(
+    @Root() parent: Comment,
+    @Arg("take", { defaultValue: 10 }) take: number
+  ): Promise<Comment[] | undefined> {
+    return Comment.find<Comment>(
+      filterDeleted<Comment>({
+        where: { parentId: parent.id },
+        take,
+        order: { creationDate: "DESC" }
+      })
+    );
   }
 }

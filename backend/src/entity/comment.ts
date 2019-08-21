@@ -43,4 +43,8 @@ export class Comment extends BaseEntity {
   @Field()
   @Column({ default: false })
   isDeleted: boolean;
+
+  @Field()
+  @Column({ default: "-1" })
+  parentId: string;
 }
