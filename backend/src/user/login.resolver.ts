@@ -5,24 +5,24 @@ import { AppContext } from "../common/types/context";
 
 @Resolver(User)
 export class LoginResolver {
-  @Mutation(() => User, { nullable: true })
+  @Mutation(() => Boolean)
   async login(
     @Arg("email") email: string,
     @Arg("password") password: string,
     @Ctx() ctx: AppContext
-  ): Promise<User | null> {
+  ): Promise<boolean> {
     const user = await User.findOne<User>({ where: { email } });
     if (!user) {
-      return null;
+      return false;
     }
 
     const valid = await bcrypt.compare(password, user.password);
 
     if (!valid) {
-      return null;
+      return false;
     }
 
     ctx.req.session!.userId = user.id;
-    return user;
+    return true;
   }
 }
