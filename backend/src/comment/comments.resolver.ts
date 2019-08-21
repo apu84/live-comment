@@ -5,8 +5,10 @@ import {
   Mutation,
   Query,
   Resolver,
-  Root
+  Root,
+  UseMiddleware
 } from "type-graphql/dist";
+import { isAuthenticated } from "../common/middleware/authenticated";
 import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
 import { User } from "../entity/user";
@@ -46,6 +48,7 @@ export class CommentsResolver {
     return User.findOne({ where: { id: parent.userId } });
   }
 
+  @UseMiddleware(isAuthenticated)
   @Mutation(() => Comment)
   async addComment(
     @Arg("content") content: string,
@@ -60,6 +63,7 @@ export class CommentsResolver {
     return comment;
   }
 
+  @UseMiddleware(isAuthenticated)
   @Mutation(() => Comment, { nullable: true })
   async editComment(@Arg("data") data: CommentInputType) {
     const comment = await Comment.findOne<Comment>({ where: { id: data.id } });
