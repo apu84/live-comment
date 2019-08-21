@@ -8,11 +8,17 @@ import {
   Root,
   UseMiddleware
 } from "type-graphql/dist";
-import { FindManyOptions } from "typeorm";
+import {
+  EntityManager,
+  FindManyOptions,
+  Transaction,
+  TransactionManager
+} from "typeorm";
 import { isAuthenticated } from "../common/middleware/authenticated";
 import { isAuthorized } from "../common/middleware/authorized";
 import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
+import { CommentEditHistory } from "../entity/comment-edit-history";
 import { User } from "../entity/user";
 import { CreateCommentInputType } from "./create.comment.input";
 import { EditCommentInputType } from "./edit.comment.input";
@@ -84,24 +90,35 @@ export class CommentsResolver {
     return comment;
   }
 
+  @Transaction()
   @UseMiddleware(isAuthenticated, isAuthorized)
   @Mutation(() => Comment, { nullable: true })
   async editComment(
-    @Arg("data") data: EditCommentInputType
+    @Arg("data") data: EditCommentInputType,
+    @TransactionManager() manager: EntityManager
   ): Promise<Comment | undefined> {
-    const comment = await Comment.findOne<Comment>(
+    let comment = await Comment.findOne<Comment>(
       filterDeleted<Comment>({ where: { id: data.id } })
     );
     if (comment) {
+      const history = CommentEditHistory.create<CommentEditHistory>({
+        commentId: comment.id,
+        content: comment.content
+      });
+      await manager.save(history);
       comment.content = data.content;
-      await comment.save();
+      comment = await manager.save(comment);
     }
     return comment;
   }
 
+  @Transaction()
   @UseMiddleware(isAuthenticated, isAuthorized)
   @Mutation(() => Comment, { nullable: true })
-  async deleteComment(@Arg("id") id: string): Promise<Comment | undefined> {
+  async deleteComment(
+    @Arg("id") id: string,
+    @TransactionManager() manager: EntityManager
+  ): Promise<Comment | undefined> {
     const comment = await Comment.findOne<Comment>(
       filterDeleted({ where: { id } })
     );
@@ -116,8 +133,15 @@ export class CommentsResolver {
           `Can not remove comment, as it has ${replyCount} or more replies`
         );
       }
+      const history = CommentEditHistory.create<CommentEditHistory>({
+        commentId: comment.id,
+        content: comment.content,
+        isDeleted: true
+      });
+      await manager.save(history);
+
       comment.isDeleted = true;
-      await comment.save();
+      await manager.save(comment);
     }
     return comment;
   }
