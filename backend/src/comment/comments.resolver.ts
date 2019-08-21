@@ -106,6 +106,16 @@ export class CommentsResolver {
       filterDeleted({ where: { id } })
     );
     if (comment) {
+      const replyCount = await Comment.count<Comment>(
+        filterDeleted<Comment>({
+          where: { parentId: comment.id }
+        })
+      );
+      if (replyCount > 0) {
+        throw new Error(
+          `Can not remove comment, as it has ${replyCount} or more replies`
+        );
+      }
       comment.isDeleted = true;
       await comment.save();
     }
