@@ -61,7 +61,7 @@ export class CommentsResolver {
     );
   }
 
-  @FieldResolver()
+  @FieldResolver(() => User)
   async user(@Root() parent: Comment) {
     return User.findOne<Comment>(
       filterDeleted({ where: { id: parent.userId } })
