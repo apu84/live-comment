@@ -8,11 +8,24 @@ import {
   Root,
   UseMiddleware
 } from "type-graphql/dist";
+import { FindManyOptions } from "typeorm";
 import { isAuthenticated } from "../common/middleware/authenticated";
+import { isAuthorized } from "../common/middleware/authorized";
 import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
 import { User } from "../entity/user";
 import { CommentInputType } from "./comment.input";
+
+function filterDeleted<T>(
+  condition: FindManyOptions<T>,
+  deleted: boolean = false
+) {
+  if (!condition.where) {
+    condition.where = {};
+  }
+  Object.assign(condition.where, { isDeleted: deleted });
+  return condition;
+}
 
 @Resolver(Comment)
 export class CommentsResolver {
@@ -23,12 +36,12 @@ export class CommentsResolver {
 
   @Query(() => [Comment])
   async comments(): Promise<Comment[]> {
-    return Comment.find<Comment>();
+    return Comment.find<Comment>(filterDeleted({}));
   }
 
   @Query(() => Comment, { nullable: true })
   async comment(@Arg("id") id: string): Promise<Comment | undefined> {
-    return Comment.findOne({ where: { id } });
+    return Comment.findOne<Comment>(filterDeleted({ where: { id } }));
   }
 
   @Query(() => [Comment])
@@ -36,16 +49,20 @@ export class CommentsResolver {
     @Arg("userId") userId: string,
     @Arg("take", { defaultValue: 10 }) take: number
   ): Promise<Comment[] | undefined> {
-    return Comment.find({
-      where: { userId },
-      take,
-      order: { creationDate: "DESC" }
-    });
+    return Comment.find<Comment>(
+      filterDeleted<Comment>({
+        where: { userId },
+        take,
+        order: { creationDate: "DESC" }
+      })
+    );
   }
 
   @FieldResolver()
   async user(@Root() parent: Comment) {
-    return User.findOne({ where: { id: parent.userId } });
+    return User.findOne<Comment>(
+      filterDeleted({ where: { id: parent.userId } })
+    );
   }
 
   @UseMiddleware(isAuthenticated)
@@ -63,12 +80,29 @@ export class CommentsResolver {
     return comment;
   }
 
-  @UseMiddleware(isAuthenticated)
+  @UseMiddleware(isAuthenticated, isAuthorized)
   @Mutation(() => Comment, { nullable: true })
-  async editComment(@Arg("data") data: CommentInputType) {
-    const comment = await Comment.findOne<Comment>({ where: { id: data.id } });
+  async editComment(
+    @Arg("data") data: CommentInputType
+  ): Promise<Comment | undefined> {
+    const comment = await Comment.findOne<Comment>(
+      filterDeleted<Comment>({ where: { id: data.id } })
+    );
     if (comment) {
       comment.content = data.content;
+      await comment.save();
+    }
+    return comment;
+  }
+
+  @UseMiddleware(isAuthenticated, isAuthorized)
+  @Mutation(() => Comment, { nullable: true })
+  async deleteComment(@Arg("id") id: string): Promise<Comment | undefined> {
+    const comment = await Comment.findOne<Comment>(
+      filterDeleted({ where: { id } })
+    );
+    if (comment) {
+      comment.isDeleted = true;
       await comment.save();
     }
     return comment;
