@@ -23,7 +23,7 @@ export class UsersResolver {
     return User.findOne({ where: { email } });
   }
 
-  @FieldResolver()
+  @FieldResolver(() => [Comment], { nullable: true })
   async comments(@Root() parent: User): Promise<Comment[]> {
     return Comment.find<Comment>({ where: { userId: parent.id } });
   }

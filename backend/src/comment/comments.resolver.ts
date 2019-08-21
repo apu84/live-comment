@@ -8,6 +8,7 @@ import {
   Root,
   UseMiddleware
 } from "type-graphql/dist";
+import { Container } from "typedi";
 import {
   EntityManager,
   FindManyOptions,
@@ -20,10 +21,11 @@ import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
 import { CommentEditHistory } from "../entity/comment-edit-history";
 import { User } from "../entity/user";
+import { CommentService } from "./comment.service";
 import { CreateCommentInputType } from "./create.comment.input";
 import { EditCommentInputType } from "./edit.comment.input";
 
-function filterDeleted<T>(
+export function filterDeleted<T>(
   condition: FindManyOptions<T>,
   deleted: boolean = false
 ): FindManyOptions<T> {
@@ -36,6 +38,11 @@ function filterDeleted<T>(
 
 @Resolver(Comment)
 export class CommentsResolver {
+  private commentService: CommentService;
+
+  constructor() {
+    this.commentService = Container.get(CommentService);
+  }
   @Query(() => String)
   async ping() {
     return "pong";
@@ -69,9 +76,7 @@ export class CommentsResolver {
 
   @FieldResolver(() => User)
   async user(@Root() parent: Comment) {
-    return User.findOne<Comment>(
-      filterDeleted({ where: { id: parent.userId } })
-    );
+    return this.commentService.getUser(parent.userId);
   }
 
   @UseMiddleware(isAuthenticated)
