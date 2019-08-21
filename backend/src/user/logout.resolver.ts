@@ -11,6 +11,7 @@ export class LoginResolver {
         if (err) {
           reject(false);
         } else {
+          ctx.res.clearCookie("qid");
           resolve(true);
         }
       });
