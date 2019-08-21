@@ -1,15 +1,16 @@
 import {
-  Resolver,
-  Query,
-  Mutation,
   Arg,
+  Ctx,
   FieldResolver,
-  Root,
-  Ctx
+  Mutation,
+  Query,
+  Resolver,
+  Root
 } from "type-graphql/dist";
+import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
 import { User } from "../entity/user";
-import { AppContext } from "../common/types/context";
+import { CommentInputType } from "./comment.input";
 
 @Resolver(Comment)
 export class CommentsResolver {
@@ -56,6 +57,16 @@ export class CommentsResolver {
       userId
     }).save();
 
+    return comment;
+  }
+
+  @Mutation(() => Comment, { nullable: true })
+  async editComment(@Arg("data") data: CommentInputType) {
+    const comment = await Comment.findOne<Comment>({ where: { id: data.id } });
+    if (comment) {
+      comment.content = data.content;
+      await comment.save();
+    }
     return comment;
   }
 }

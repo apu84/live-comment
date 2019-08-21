@@ -27,11 +27,11 @@ export class Comment extends BaseEntity {
 
   @Field()
   @CreateDateColumn()
-  creationDate: string;
+  creationDate: Date;
 
   @Field()
   @UpdateDateColumn()
-  lastModifiedDate: string;
+  lastModifiedDate: Date;
 
   @Field()
   @VersionColumn()

@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql/dist";
 import { ApolloServer } from "apollo-server-express/dist";
-import Express from "express";
+import express from "express";
 import { getSession } from "./common/user-session";
 import { corsConfig } from "./common/cors-config";
 
@@ -18,7 +18,7 @@ const bootstrap = async () => {
     context: ({ req, res }: any) => ({ req, res })
   });
 
-  const app = Express();
+  const app = express();
 
   app.use(corsConfig());
   app.use(getSession());
