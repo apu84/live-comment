@@ -1,18 +1,16 @@
-import { graphql, GraphQLSchema } from "graphql";
-import { initDb } from "../test-utils/init-db-connection";
-import { Connection } from "typeorm";
-import { buildSchema } from "type-graphql/dist";
 import faker from "faker";
+import { graphql, GraphQLSchema } from "graphql";
+import { Connection } from "typeorm";
+import { createSchema } from "../common/build-schema";
 import { User } from "../entity/user";
+import { initDb } from "../test-utils/init-db-connection";
 
 let conn: Connection;
 let schema: GraphQLSchema;
 
 beforeAll(async () => {
   conn = await initDb();
-  schema = await buildSchema({
-    resolvers: [__dirname + "/../**/*.resolver.ts"]
-  });
+  schema = await createSchema();
 });
 
 const meQuery = `

@@ -1,17 +1,15 @@
-import "reflect-metadata";
-import { createConnection } from "typeorm";
-import { buildSchema } from "type-graphql/dist";
 import { ApolloServer } from "apollo-server-express/dist";
 import express from "express";
-import { getSession } from "./common/user-session";
+import "reflect-metadata";
+import { createConnection } from "typeorm";
+import { createSchema } from "./common/build-schema";
 import { corsConfig } from "./common/cors-config";
+import { getSession } from "./common/user-session";
 
 const bootstrap = async () => {
   await createConnection();
 
-  const schema = await buildSchema({
-    resolvers: [__dirname + "/**/*.resolver.ts"]
-  });
+  const schema = await createSchema();
 
   const apolloServer = new ApolloServer({
     schema,
