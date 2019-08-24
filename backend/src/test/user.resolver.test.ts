@@ -1,11 +1,11 @@
 import faker from "faker";
-import { graphql, GraphQLSchema } from "graphql";
+import { graphql } from "graphql";
 import { Connection } from "typeorm";
 import { createSchema } from "../common/build-schema";
 import { initDb } from "../test-utils/init-db-connection";
 
 let conn: Connection;
-let schema: GraphQLSchema;
+let schema: any;
 
 beforeAll(async () => {
   conn = await initDb();
