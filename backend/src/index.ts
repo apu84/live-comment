@@ -1,19 +1,15 @@
 import { ApolloServer } from "apollo-server-express/dist";
 import express from "express";
 import "reflect-metadata";
-import { createConnections } from "typeorm";
+import { createConnections, useContainer } from "typeorm";
 import { createSchema } from "./common/build-schema";
 import { corsConfig } from "./common/cors-config";
 import { getSession } from "./common/user-session";
-import { DistributedEntityManager } from "./common/decorator/distributed-entitity-manager";
 import { Container } from "typedi";
 
 const bootstrap = async () => {
-  const connections = await createConnections();
-  const dem = new DistributedEntityManager(
-    connections.map(connection => connection.manager)
-  );
-  Container.set(DistributedEntityManager, dem);
+  useContainer(Container);
+  await createConnections();
 
   const schema = await createSchema();
 

@@ -6,7 +6,7 @@ import { filterDeleted } from "./comments.resolver";
 export class CommentService {
   public async getUser(userId: string): Promise<User | undefined> {
     if (userId === "-1") {
-      return Promise.resolve( getAnonymousUser() );
+      return Promise.resolve(getAnonymousUser());
     } else {
       return User.findOne<User>(filterDeleted({ where: { id: userId } }));
     }
@@ -20,5 +20,5 @@ function getAnonymousUser(): User {
     userId: "anonymous",
     active: true,
     email: ""
-  } as User
+  } as User;
 }

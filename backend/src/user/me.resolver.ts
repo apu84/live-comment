@@ -1,4 +1,4 @@
-import { Query, Resolver, Ctx } from "type-graphql/dist";
+import { Query, Resolver, Ctx, Mutation } from "type-graphql/dist";
 import { TransactionManager } from "typeorm";
 import { DistributedTransaction } from "../common/decorator/distributed-transaction";
 import { User } from "../entity/user";
@@ -8,9 +8,18 @@ import { CommentTest } from "../entity/commenttest";
 
 @Resolver(User)
 export class MeResolver {
-  @DistributedTransaction()
   @Query(() => User, { nullable: true })
-  async me(
+  async me(@Ctx() ctx: AppContext): Promise<User | undefined | null> {
+    const id = ctx.req.session!.userId;
+    if (!id) {
+      return null;
+    }
+    return User.findOne<User>({ where: { id } });
+  }
+
+  @DistributedTransaction()
+  @Mutation(() => User, { nullable: true })
+  async transactionTest(
     @Ctx() ctx: AppContext,
     @TransactionManager() manager: DistributedEntityManager
   ): Promise<User | undefined | null> {
@@ -21,13 +30,14 @@ export class MeResolver {
     const user = await User.findOne<User>({ where: { id } });
     if (user) {
       user.active = !user.active;
-      await manager.saveEntity(User, user);
+      await manager.save(User, user);
 
       const testComment = CommentTest.create({
         content: "This is a comment " + new Date(),
         userId: user.id
       });
-      await manager.saveEntity(CommentTest, testComment);
+      await manager.save(CommentTest, testComment);
+      throw new Error("Error in transaction");
     }
     return user;
   }
