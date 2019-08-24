@@ -1,8 +1,7 @@
-import { Query, Resolver, Ctx, Mutation } from "type-graphql/dist";
+import { Query, Resolver, Mutation } from "type-graphql/dist";
 import { TransactionManager } from "typeorm";
 import { DistributedTransaction } from "../common/decorator/distributed-transaction";
 import { User } from "../entity/user";
-import { AppContext } from "../common/types/context";
 import { DistributedEntityManager } from "../common/decorator/distributed-entitity-manager";
 import { CommentTest } from "../entity/commenttest";
 import { CurrentUser } from "./current-user.decorator";

@@ -1,6 +1,7 @@
 import { ApolloServer } from "apollo-server-express/dist";
 import express from "express";
 import "reflect-metadata";
+import { createServer } from "http";
 import { createConnections, useContainer } from "typeorm";
 import { createSchema } from "./common/build-schema";
 import { corsConfig } from "./common/cors-config";
@@ -25,8 +26,17 @@ const bootstrap = async () => {
 
   apolloServer.applyMiddleware({ app });
 
-  app.listen(4000, () => {
-    console.log("server started on http://localhost:4000/graphql");
+  const httpServer = createServer(app);
+  apolloServer.installSubscriptionHandlers(httpServer);
+
+  const PORT = 4000;
+  httpServer.listen(PORT, () => {
+    console.log(
+      `🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`
+    );
+    console.log(
+      `🚀 Subscriptions ready at ws://localhost:${PORT}${apolloServer.subscriptionsPath}`
+    );
   });
 };
 

@@ -1,3 +1,4 @@
+import { PubSubEngine } from "graphql-subscriptions";
 import {
   Arg,
   Ctx,
@@ -6,7 +7,9 @@ import {
   Query,
   Resolver,
   Root,
-  UseMiddleware
+  UseMiddleware,
+  PubSub,
+  Subscription
 } from "type-graphql/dist";
 import {
   EntityManager,
@@ -79,14 +82,17 @@ export class CommentsResolver {
   @Mutation(() => Comment)
   async addComment(
     @Arg("data") data: CreateCommentInputType,
-    @Ctx() ctx: AppContext
+    @Ctx() ctx: AppContext,
+    @PubSub() pubSub: PubSubEngine
   ): Promise<Comment> {
     const userId = ctx.req.session!.userId;
-    const comment = Comment.create<Comment>({
+    const comment = await Comment.create<Comment>({
       content: data.content,
       userId,
       parentId: data.parentId
     }).save();
+
+    pubSub.publish(`comment-${comment.parentId}`, comment);
 
     return comment;
   }
@@ -159,5 +165,16 @@ export class CommentsResolver {
         order: { creationDate: "DESC" }
       })
     );
+  }
+
+  @Subscription({
+    topics: ({ args }) => `comment-${args.commentId}`
+  })
+  subscribe(
+    @Arg("commentId") commentId: string,
+    @Root() comment: Comment
+  ): Comment {
+    console.info(`Subscribed for comment with id ${commentId}`);
+    return comment;
   }
 }
