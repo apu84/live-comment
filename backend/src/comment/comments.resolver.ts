@@ -8,7 +8,6 @@ import {
   Root,
   UseMiddleware
 } from "type-graphql/dist";
-import { Container } from "typedi";
 import {
   EntityManager,
   FindManyOptions,
@@ -38,11 +37,8 @@ export function filterDeleted<T>(
 
 @Resolver(Comment)
 export class CommentsResolver {
-  private commentService: CommentService;
+  constructor(private commentService: CommentService) {}
 
-  constructor() {
-    this.commentService = Container.get(CommentService);
-  }
   @Query(() => String)
   async ping() {
     return "pong";
