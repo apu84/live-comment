@@ -2,6 +2,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis from "ioredis";
 
+export const cookieId = "qid";
 const RedisStore = connectRedis(session);
 
 export const getSession = () => {
@@ -9,7 +10,7 @@ export const getSession = () => {
     store: new RedisStore({
       client: new Redis() as any
     }),
-    name: "qid",
+    name: cookieId,
     secret: "long-range",
     resave: false,
     saveUninitialized: false,

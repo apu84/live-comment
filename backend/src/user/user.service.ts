@@ -1,9 +1,9 @@
 import { Service } from "typedi";
 import { User } from "../entity/user";
-import { filterDeleted } from "./comments.resolver";
+import { filterDeleted } from "../comment/comments.resolver";
 
 @Service()
-export class CommentService {
+export class UserService {
   public async getUser(userId: string): Promise<User | undefined> {
     if (userId === "-1") {
       return Promise.resolve(getAnonymousUser());

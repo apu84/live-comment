@@ -20,7 +20,7 @@ import { AppContext } from "../common/types/context";
 import { Comment } from "../entity/comment";
 import { CommentEditHistory } from "../entity/comment-edit-history";
 import { User } from "../entity/user";
-import { CommentService } from "./comment.service";
+import { UserService } from "../user/user.service";
 import { CreateCommentInputType } from "./create.comment.input";
 import { EditCommentInputType } from "./edit.comment.input";
 
@@ -37,7 +37,7 @@ export function filterDeleted<T>(
 
 @Resolver(Comment)
 export class CommentsResolver {
-  constructor(private commentService: CommentService) {}
+  constructor(private userService: UserService) {}
 
   @Query(() => String)
   async ping() {
@@ -72,7 +72,7 @@ export class CommentsResolver {
 
   @FieldResolver(() => User)
   async user(@Root() parent: Comment) {
-    return this.commentService.getUser(parent.userId);
+    return this.userService.getUser(parent.userId);
   }
 
   @UseMiddleware(isAuthenticated)

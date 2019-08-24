@@ -1,6 +1,7 @@
 import { Ctx, Mutation, Resolver } from "type-graphql/dist";
 import { AppContext } from "../common/types/context";
 import { User } from "../entity/user";
+import { cookieId } from "../common/user-session";
 
 @Resolver(User)
 export class LoginResolver {
@@ -11,7 +12,7 @@ export class LoginResolver {
         if (err) {
           reject(false);
         } else {
-          ctx.res.clearCookie("qid");
+          ctx.res.clearCookie(cookieId);
           resolve(true);
         }
       });

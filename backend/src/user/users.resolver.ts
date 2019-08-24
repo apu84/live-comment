@@ -10,9 +10,12 @@ import { User } from "../entity/user";
 import { Comment } from "../entity/comment";
 import bcrypt from "bcryptjs";
 import { RegisterUserInputType } from "./register-user.input";
+import { UseMiddleware } from "type-graphql/dist";
+import { isAuthenticated } from "../common/middleware/authenticated";
 
 @Resolver(User)
 export class UsersResolver {
+  @UseMiddleware(isAuthenticated)
   @Query(() => [User])
   async users(): Promise<User[]> {
     return User.find<User>();
